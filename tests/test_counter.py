@@ -48,6 +48,10 @@ class CounterTest(TestCase):
         updated = self.client.put("/counters/boo")
         self.assertEqual(originalValue + 1, updated.json['boo'])
 
+        # should not exist, so resource shouldn't be found
+        throwError = self.client.put("/counters/nonexistant")
+        self.assertEqual(throwError.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_read_a_counter(self):
         """It should read the value of a counter"""
         result = self.client.post("/counters/foobar")
@@ -56,3 +60,19 @@ class CounterTest(TestCase):
 
         readValue = self.client.get("/counters/foobar")
         self.assertEqual(0, readValue.json['foobar'])
+
+        # should not exist, so resource shouldn't be found
+        throwError = self.client.get("/counters/nonexistant")
+        self.assertEqual(throwError.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_a_counter(self):
+        """It should delete a counter"""
+        result = self.client.post("/counters/far")
+        self.assertEqual(result.status_code, status.HTTP_201_CREATED)
+
+        deleted = self.client.delete("/counters/far")
+        self.assertEqual(deleted.status_code, status.HTTP_204_NO_CONTENT)
+
+        # should already be deleted, so resource shouldn't be found
+        throwError = self.client.delete("/counters/far")
+        self.assertEqual(throwError.status_code, status.HTTP_404_NOT_FOUND)
